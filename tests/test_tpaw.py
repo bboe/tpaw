@@ -1,14 +1,8 @@
+from unittest.mock import Mock
+
 import pytest
-from lxml.html import fragment_fromstring
-
 import tpaw
-
-
-def test_tildes_groups():
-    tildes = tpaw.Tildes()
-    for i, group in enumerate(tildes.groups()):
-        assert isinstance(group, dict)
-    assert i == 29
+from lxml.html import fragment_fromstring
 
 
 def test_one_class():
@@ -31,3 +25,23 @@ def test_one_class():
 
     element = fragment_fromstring('<div><p class="found">')
     assert tpaw.one_class(element, "found") in element
+
+
+def test_tildes_groups(tildes):
+    with open("tests/data/groups.html") as fp:
+        content = fp.read()
+
+    tildes._session.get.return_value = Mock(
+        content=content, headers={"Content-Type": "text/html;"}, status_code=200
+    )
+
+    for i, group in enumerate(tildes.groups()):
+        assert isinstance(group, dict)
+    assert i == 29
+
+
+@pytest.fixture
+def tildes():
+    client = tpaw.Tildes()
+    client._session = Mock()
+    return client
