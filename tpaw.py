@@ -8,8 +8,12 @@ import lxml.html
 __version__ = "0.0.1-alpha"
 
 
-def one(collection):
-    assert len(collection) == 1, f"Expected exactly 1 element in {collection}"
+def one_class(element, class_selector):
+    collection = element.find_class(class_selector)
+    if len(collection) != 1:
+        raise TPAWError(
+            "Expected to find exactly 1 element", collection=collection, element=element
+        )
     return collection[0]
 
 
@@ -18,12 +22,18 @@ class HTMLParser:
     def parse_group(group):
         return {
             "activity": TextParser.parse_group_description(
-                one(group.find_class("group-list-activity")).text
+                one_class(group, "group-list-activity").text
             ),
-            "description": one(group.find_class("group-list-description")).text,
+            "description": one_class(group, "group-list-description").text,
             "name": group.find("a").text,
             "subscribed": "group-list-item-subscribed" in group.classes,
         }
+
+
+class TPAWError(Exception):
+    def __init__(self, *args, **kwargs):
+        self.__dict__ = kwargs
+        super().__init__(*args)
 
 
 class TextParser:
@@ -35,7 +45,7 @@ class TextParser:
 
 class Tildes:
     BASE_URL = "https://tildes.net"
-    DEFAULT_HEADERS = {"User-Agent": "tpaw/experimental (bboe)"}
+    DEFAULT_HEADERS = {"User-Agent": f"tpaw/{__version__}"}
 
     def __init__(self):
         self._session = requests.Session()
@@ -56,9 +66,8 @@ class Tildes:
     def groups(self):
         response = self._get("groups")
         document = lxml.html.document_fromstring(response.content)
-        for group in one(document.find_class("group-list")).iter("li"):
+        for group in one_class(document, "group-list").iter("li"):
             yield HTMLParser.parse_group(group)
-
 
 
 if __name__ == "__main__":
@@ -67,5 +76,3 @@ if __name__ == "__main__":
         import pprint
 
         pprint.pprint(group)
-
-    return 0
