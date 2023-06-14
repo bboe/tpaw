@@ -35,9 +35,22 @@ def test_tildes_groups(tildes):
         content=content, headers={"Content-Type": "text/html;"}, status_code=200
     )
 
-    for i, group in enumerate(tildes.groups()):
+    for i, group in enumerate(tildes.groups(), start=1):
         assert isinstance(group, dict)
-    assert i == 29
+    assert i == 30
+
+
+def test_tildes_new(tildes):
+    with open("tests/data/slash_new.html") as fp:
+        content = fp.read()
+
+    tildes._session.get.return_value = Mock(
+        content=content, headers={"Content-Type": "text/html;"}, status_code=200
+    )
+
+    for i, topic in enumerate(tildes.topics(), start=1):
+        assert isinstance(topic, dict)
+    assert i == 10
 
 
 @pytest.fixture
