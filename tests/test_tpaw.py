@@ -1,8 +1,9 @@
 from unittest.mock import Mock
 
 import pytest
-import tpaw
 from lxml.html import fragment_fromstring
+
+import tpaw
 
 
 def test_one_class():

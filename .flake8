@@ -1,0 +1,6 @@
+[flake8]
+application-import-names = tpaw
+count = true
+ignore = D100, D101, D102, D103, D104, D107
+import-order-style = smarkets
+max-line-length = 88

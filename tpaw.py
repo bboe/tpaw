@@ -1,12 +1,11 @@
 """Tildes Python API Wrapper."""
 
-import sys
 from datetime import datetime, timedelta
 
-import requests
 import lxml.html
+import requests
 
-__version__ = "0.0.1a2"
+__version__ = "0.0.1a3"
 
 
 def one_class(element, class_selector, /):
