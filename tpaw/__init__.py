@@ -1,9 +1,10 @@
 """Tildes Python API Wrapper."""
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import lxml.html
 import requests
+from requests.status_codes import codes
 
 __version__ = "0.0.1a4"
 
@@ -11,9 +12,8 @@ __version__ = "0.0.1a4"
 def one_class(element, class_selector, /):
     collection = element.find_class(class_selector)
     if len(collection) != 1:
-        raise TPAWError(
-            "Expected to find exactly 1 element", collection=collection, element=element
-        )
+        message = "Expected to find exactly 1 element"
+        raise TPAWError(message, collection=collection, element=element)
     return collection[0]
 
 
@@ -29,7 +29,7 @@ class HTMLParser:
         for metadata in topic.find_class("topic-content-metadata"):
             text = metadata.text.strip().rstrip(",")
             if text.startswith("published"):
-                result["published"] = datetime.strptime(text[10:], "%b %d %Y").date()
+                result["published"] = TextParser.parse_date(text[10:])
             else:
                 result["word_count"] = TextParser.parse_number_phrase(text)
 
@@ -37,7 +37,7 @@ class HTMLParser:
         return result
 
     @staticmethod
-    def enrich_ask(topic, /, *, type_, **_kwargs):
+    def enrich_ask(_topic, /, *, type_, **_kwargs):
         result = {"type": "Ask"}
         if type_ != "Ask":
             result["subtype"] = type_[5:-1]
@@ -80,7 +80,7 @@ class HTMLParser:
         for metadata in topic.find_class("topic-content-metadata"):
             text = metadata.text.strip().rstrip(",")
             if text.startswith("published"):
-                result["published"] = datetime.strptime(text[10:], "%b %d %Y").date()
+                result["published"] = TextParser.parse_date(text[10:])
             else:
                 minutes, seconds = text.split(":")
                 result["duration"] = timedelta(
@@ -139,6 +139,14 @@ class TPAWError(Exception):
 
 class TextParser:
     @staticmethod
+    def parse_date(date_string):
+        return (
+            datetime.strptime(date_string, "%b %d %Y")
+            .replace(tzinfo=timezone.utc)
+            .date()
+        )
+
+    @staticmethod
     def parse_datetime(datetime_string):
         assert datetime_string.endswith(
             "Z"
@@ -160,14 +168,14 @@ class Tildes:
     DEFAULT_HEADERS = {"User-Agent": f"tpaw/{__version__}"}
 
     def __init__(self):
-        self._session = requests.Session()
+        self.session = requests.Session()
 
     def _get(self, path, /, *, params=None):
-        response = self._session.get(
+        response = self.session.get(
             f"{self.BASE_URL}/{path}", headers=self.DEFAULT_HEADERS, params=params
         )
         assert (
-            response.status_code == 200
+            response.status_code == codes["ok"]
         ), f"Invalid status code {response.status_code}"
         content_type = response.headers["Content-Type"]
         assert content_type.startswith(
@@ -193,4 +201,4 @@ if __name__ == "__main__":
     for topic in tildes.topics():
         import pprint
 
-        pprint.pprint(topic)
+        pprint.pprint(topic)  # noqa: T203

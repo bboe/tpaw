@@ -2,22 +2,9 @@
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
 
 name: Python package
-
-on:
-  push:
-    branches: [ "dev", "main" ]
-  pull_request:
-    branches: [ "main" ]
-
 jobs:
-  build:
-
+  lint:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11"]
-
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python ${{ matrix.python-version }}
@@ -27,10 +14,37 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install .[develop,test]
+        python -m pip install .[develop]
     - name: Lint with black
       run: black --check .
-    - name: Lint with flake8
-      run: flake8 . --count --exit-zero --statistics
+    - name: Lint with ruff
+      run: ruff check .
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11"]
+
+  pytest:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install .[test]
     - name: Test with pytest
       run: pytest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
+
+on:
+  pull_request:
+    branches: ["main"]
+  push:
+    branches: ["dev", "main"]

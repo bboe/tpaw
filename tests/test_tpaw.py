@@ -1,3 +1,4 @@
+from pathlib import Path
 from unittest.mock import Mock
 
 import pytest
@@ -29,33 +30,37 @@ def test_one_class():
 
 
 def test_tildes_groups(tildes):
-    with open("tests/data/groups.html") as fp:
+    with Path("tests/data/groups.html").open() as fp:
         content = fp.read()
 
-    tildes._session.get.return_value = Mock(
+    tildes.session.get.return_value = Mock(
         content=content, headers={"Content-Type": "text/html;"}, status_code=200
     )
 
-    for i, group in enumerate(tildes.groups(), start=1):
+    count = 0
+    for group in tildes.groups():
+        count += 1
         assert isinstance(group, dict)
-    assert i == 30
+    assert count == 30
 
 
 def test_tildes_new(tildes):
-    with open("tests/data/slash_new.html") as fp:
+    with Path("tests/data/slash_new.html").open() as fp:
         content = fp.read()
 
-    tildes._session.get.return_value = Mock(
+    tildes.session.get.return_value = Mock(
         content=content, headers={"Content-Type": "text/html;"}, status_code=200
     )
 
-    for i, topic in enumerate(tildes.topics(), start=1):
+    count = 0
+    for topic in tildes.topics():
+        count += 1
         assert isinstance(topic, dict)
-    assert i == 10
+    assert count == 10
 
 
-@pytest.fixture
+@pytest.fixture()
 def tildes():
     client = tpaw.Tildes()
-    client._session = Mock()
+    client.session = Mock()
     return client

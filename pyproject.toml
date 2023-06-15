@@ -9,12 +9,13 @@ dependencies = ["lxml >=4.9.2", "requests >=2.28"]
 dynamic = ["version", "description"]
 license = {file = "LICENSE"}
 name = "tpaw"
+requires-python = ">=3.8"
 
 [project.optional-dependencies]
 develop = [
     "black >=23.3.0",
-    "flake8 >=6.0.0",
-    "pre-commit >=3.3.3"
+    "pre-commit >=3.3.3",
+    "ruff >=0.0.272"
 ]
 test = [
     "pytest >=7.3.2"
@@ -22,3 +23,55 @@ test = [
 
 [project.urls]
 Home = "https://github.com/bboe/tpaw"
+
+
+[tool.ruff]
+ignore = [
+    "E501",  # line-length
+    "S101"   # use of assert
+]
+select = [
+    "A",   # flake8-builtins
+    #"ANN", # flake8-annotations
+    "ARG", # flake8-unused-arguments
+    "B",   # flake8-bugbear
+    "BLE", # flake8-blind-except
+    "C4",  # flake8-comprehensions
+    #"D",   # pydocstyle
+    "DTZ", # flake8-datetimez
+    "E",   # pycodestyle
+    "EM",  # flake8-errmsg
+    "ERA", # eradicate
+    "EXE", # flake8-executable
+    "F",   # pyflakes
+    "FA",  # flake8-future-annotations
+    "FBT", # flake8-boolean-trap
+    "FIX", # flake8-fixme
+    "G",   # flake8-logging-format
+    "I",   # isort
+    "INP", # flake8-no-pep420
+    "ISC", # flake8-implicit-str-concat
+    "N",   # pep8-naming
+    "PIE", # flake8-pie
+    "PGH", # pygrep-hooks
+    "PL",  # Pylint
+    "PT",  # flake8-pytest-style
+    "PTH", # flake8-use-pathlib
+    "PYI", # flake8-pyi
+    "Q",   # flake8-quotes
+    "RET", # flake8-return
+    "RSE", # flake8-raise
+    "S",   # bandit
+    "SIM", # flake8-simplify
+    "SLF", # flake8-self
+    "T10", # flake8-debugger
+    "T20", # flake8-print
+    "TCH", # flake8-type-checking
+    "TD",  # flake8-todos
+    "TID", # flake8-tidy-imports
+    "W",   # pycodestyle
+    "UP",  # pyupgrade
+]
+
+[tool.ruff.per-file-ignores]
+"test_*.py" = ["PLR2004"]
