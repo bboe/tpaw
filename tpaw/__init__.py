@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 import lxml.html
 import requests
 
-__version__ = "0.0.1a3"
+__version__ = "0.0.1a4"
 
 
 def one_class(element, class_selector, /):
